@@ -13,10 +13,10 @@ keys and values will be trunicated
 
 #### routes
 ```
-GET /kv/:key        // fetch a value
-POST /kv/:key       // set a value
+GET /kv/:key             // fetch a value
+POST /kv/:key/:value     // set a value
 
-GET /r/:key         // redirect to value
+GET /r/:key              // redirect to value
 ```
 
 

@@ -1,7 +1,9 @@
 package kvserver
 
 import (
+	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/nathanielfernandes/kv/lib/kv"
@@ -61,6 +63,10 @@ func (kvs *KVServer) Set(w http.ResponseWriter, r *http.Request, ps httprouter.P
 	key := ps.ByName("key")
 	value := ps.ByName("value")
 
+	if decodedValue, err := url.QueryUnescape(value); err == nil {
+		value = decodedValue
+	}
+
 	kvs.kv.Set(trunicate(key, MAX_K_LENGTH), trunicate(value, MAX_V_LENGTH))
 	w.WriteHeader(http.StatusOK)
 }
@@ -75,5 +81,6 @@ func (kvs *KVServer) RedirectTo(w http.ResponseWriter, r *http.Request, ps httpr
 	key := ps.ByName("key")
 	url := kvs.kv.Get(key, "https://nathanielfernandes.ca/")
 
+	fmt.Println("Redirecting to", url)
 	http.Redirect(w, r, url, http.StatusFound)
 }
