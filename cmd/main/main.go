@@ -19,7 +19,7 @@ func main() {
 	router.GET("/r/:key", kvs.RedirectTo)
 
 	fmt.Printf("KV\nListening on port 80\n")
-	if err := http.ListenAndServe("127.0.0.1:8000", router); err != nil {
+	if err := http.ListenAndServe("0.0.0.0:80", router); err != nil {
 		log.Fatal(err)
 	}
 }
