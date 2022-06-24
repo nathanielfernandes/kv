@@ -67,8 +67,12 @@ func (kvs *KVServer) Set(w http.ResponseWriter, r *http.Request, ps httprouter.P
 		value = decodedValue
 	}
 
-	kvs.kv.Set(trunicate(key, MAX_K_LENGTH), trunicate(value, MAX_V_LENGTH))
-	w.WriteHeader(http.StatusOK)
+	if ok := kvs.kv.Set(trunicate(key, MAX_K_LENGTH), trunicate(value, MAX_V_LENGTH)); ok {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	w.WriteHeader(http.StatusConflict)
 }
 
 func (kvs *KVServer) RedirectTo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

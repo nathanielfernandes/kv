@@ -10,42 +10,59 @@ type KV struct {
 	hm *hashmap.HashMap
 
 	last_gc time.Time
-	gc      []string
-	next_gc []string
+	gc      *hashmap.HashMap
+	next_gc *hashmap.HashMap
 }
 
-var GC_TICK = 5 * time.Hour
+var GC_TICK = 6 * time.Hour
 
 func NewKV() *KV {
 	m := &KV{
 		hm: &hashmap.HashMap{},
 
 		last_gc: time.Now(),
-		gc:      []string{},
-		next_gc: []string{},
+		gc:      &hashmap.HashMap{},
+		next_gc: &hashmap.HashMap{},
 	}
 	go m.start()
 	return m
 }
 
+func (m *KV) reset_exipirey(key string) {
+	if _, ok := m.gc.Get(key); ok {
+		m.gc.Del(key)
+		m.next_gc.Set(key, struct{}{})
+	}
+}
+
 func (m *KV) Get(key string, def string) string {
-	if v, ok := m.hm.Get(key); ok {
+	if v, ok := m.hm.GetStringKey(key); ok {
+		m.reset_exipirey(key)
 		return v.(string)
 	}
 	return def
 }
 
-func (m *KV) Set(key string, value string) {
+func (m *KV) Set(key string, value string) bool {
+	if _, ok := m.gc.Get(key); ok {
+		return false
+	}
+
+	if _, ok := m.next_gc.Get(key); ok {
+		return false
+	}
+
 	m.hm.Set(key, value)
-	m.next_gc = append(m.next_gc, key)
+	m.next_gc.Set(key, struct{}{})
+	return true
 }
 
 func (m *KV) clean() {
-	for _, key := range m.gc {
-		m.hm.Del(key)
+	for kv := range m.gc.Iter() {
+		m.hm.Del(kv.Key)
 	}
 	m.gc = m.next_gc
-	m.next_gc = []string{}
+	m.next_gc = &hashmap.HashMap{}
 }
 
 func (m *KV) start() {

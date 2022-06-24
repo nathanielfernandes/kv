@@ -6,6 +6,10 @@ A shared public ephemeral kv store ;)
 
 
 #### info
+key value pairs will expire after about 6 hours of inactivity. GETting a value will reset it's keys expirey
+
+key value pairs cannot be overwritten untill they expire.
+
 keys and values will be trunicated
 - keys have a max size of 256 characters
 - values have a max size of 512 characters
