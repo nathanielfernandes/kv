@@ -44,11 +44,7 @@ func (m *KV) Get(key string, def string) string {
 }
 
 func (m *KV) Set(key string, value string) bool {
-	if _, ok := m.gc.Get(key); ok {
-		return false
-	}
-
-	if _, ok := m.next_gc.Get(key); ok {
+	if _, ok := m.hm.Get(key); ok {
 		return false
 	}
 
